@@ -1,38 +1,87 @@
 import flatpickr from 'flatpickr';
-// Додатковий імпорт стилів
 import 'flatpickr/dist/flatpickr.min.css';
-const myInput = document.querySelector('#datetime-pic');
-const fp = flatpickr(myInput, {}); // flatpickr
-
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    console.log(selectedDates[0]);
-  },
-};
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
 function convertMs(ms) {
-  // Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
   const days = Math.floor(ms / day);
-  // Remaining hours
   const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
   const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
 }
 
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+function addLeadingZero(value) {
+  return value.toString().padStart(2, '0');
+}
+
+document.querySelector('[data-start]').addEventListener('click', () => {
+  const inputDate = document.getElementById('datetime-picker').value;
+  const targetDate = new Date(inputDate).getTime();
+  const timerInterval = 1000;
+
+  const updateTimer = () => {
+    const currentDate = new Date().getTime();
+    const timeDifference = targetDate - currentDate;
+
+    if (timeDifference <= 0) {
+      clearInterval(timerId);
+      iziToast.show({
+        title: 'Timer Expired!',
+        message: '',
+        position: 'topRight',
+        timeout: 3000,
+        backgroundColor: '#ff5733',
+        color: 'white',
+      });
+      document.querySelector('[data-start]').disabled = false;
+    } else {
+      const formattedTime = convertMs(timeDifference);
+      document.querySelector('[data-days]').textContent = addLeadingZero(
+        formattedTime.days
+      );
+      document.querySelector('[data-hours]').textContent = addLeadingZero(
+        formattedTime.hours
+      );
+      document.querySelector('[data-minutes]').textContent = addLeadingZero(
+        formattedTime.minutes
+      );
+      document.querySelector('[data-seconds]').textContent = addLeadingZero(
+        formattedTime.seconds
+      );
+    }
+  };
+
+  updateTimer(); // Викликаємо для оновлення відображення на початку
+
+  const timerId = setInterval(updateTimer, timerInterval);
+});
+
+flatpickr('#datetime-picker', {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    const selectedDate = selectedDates[0];
+    if (selectedDate < new Date()) {
+      iziToast.error({
+        title: 'Error',
+        message: 'Please choose a date in the future',
+        position: 'topRight',
+        timeout: 3000,
+        backgroundColor: '#ff5733',
+        color: 'white',
+      });
+      document.querySelector('[data-start]').disabled = true;
+    } else {
+      document.querySelector('[data-start]').disabled = false;
+    }
+  },
+});
