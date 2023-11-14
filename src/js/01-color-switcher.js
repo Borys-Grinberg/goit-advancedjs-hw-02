@@ -3,10 +3,20 @@ const stopBtn = document.querySelector('.data-stop');
 let timerId = null;
 let themeChanging = false;
 
+// Функція для встановлення початкового стану кнопок
+function setInitialButtonState() {
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+}
+
+// Викликаємо функцію при завантаженні сторінки
+document.addEventListener('DOMContentLoaded', setInitialButtonState);
+
 startBtn.addEventListener('click', () => {
   if (!themeChanging) {
     themeChanging = true;
-    startBtn.disabled = true; // set disabled
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
 
     timerId = setInterval(() => {
       const randomColor = getRandomHexColor();
@@ -18,7 +28,8 @@ startBtn.addEventListener('click', () => {
 stopBtn.addEventListener('click', () => {
   clearInterval(timerId);
   themeChanging = false;
-  startBtn.disabled = false; // clear disabled
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
 });
 
 function getRandomHexColor() {
