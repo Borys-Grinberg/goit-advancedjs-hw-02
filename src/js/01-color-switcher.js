@@ -3,14 +3,9 @@ const stopBtn = document.querySelector('.data-stop');
 let timerId = null;
 let themeChanging = false;
 
-// Функція для встановлення початкового стану кнопок
-function setInitialButtonState() {
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-}
-
-// Викликаємо функцію при завантаженні сторінки
-document.addEventListener('DOMContentLoaded', setInitialButtonState);
+// Встановлення початкового стану кнопок
+startBtn.disabled = false;
+stopBtn.disabled = true;
 
 startBtn.addEventListener('click', () => {
   if (!themeChanging) {
