@@ -21,10 +21,41 @@ function addLeadingZero(value) {
   return value.toString().padStart(2, '0');
 }
 
-document.querySelector('[data-start]').addEventListener('click', () => {
-  const inputDate = document.getElementById('datetime-picker').value;
-  const targetDate = new Date(inputDate).getTime();
+const startBtn = document.querySelector('[data-start]');
+const datetimePicker = document.getElementById('datetime-picker');
+
+// Додавання визначення стану кнопки при завантаженні сторінки
+startBtn.disabled = true;
+
+flatpickr(datetimePicker, {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    const selectedDate = selectedDates[0];
+    if (selectedDate < new Date()) {
+      iziToast.error({
+        title: 'Error',
+        message: 'Please choose a date in the future',
+        position: 'topCenter',
+        timeout: 3000,
+        backgroundColor: '#ff5733',
+        color: 'white',
+      });
+      startBtn.disabled = true;
+    } else {
+      startBtn.removeAttribute('disabled');
+    }
+  },
+});
+
+startBtn.addEventListener('click', () => {
+  const targetDate = new Date(datetimePicker.value).getTime();
   const timerInterval = 1000;
+
+  startBtn.disabled = true;
+  datetimePicker.disabled = true;
 
   const updateTimer = () => {
     const currentDate = new Date().getTime();
@@ -40,7 +71,8 @@ document.querySelector('[data-start]').addEventListener('click', () => {
         backgroundColor: '#ff5733',
         color: 'white',
       });
-      document.querySelector('[data-start]').disabled = false;
+      startBtn.removeAttribute('disabled');
+      datetimePicker.removeAttribute('disabled');
     } else {
       const formattedTime = convertMs(timeDifference);
       document.querySelector('[data-days]').textContent = addLeadingZero(
@@ -58,30 +90,6 @@ document.querySelector('[data-start]').addEventListener('click', () => {
     }
   };
 
-  updateTimer(); // Викликаємо для оновлення відображення на початку
-
+  updateTimer();
   const timerId = setInterval(updateTimer, timerInterval);
-});
-
-flatpickr('#datetime-picker', {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    const selectedDate = selectedDates[0];
-    if (selectedDate < new Date()) {
-      iziToast.error({
-        title: 'Error',
-        message: 'Please choose a date in the future',
-        position: 'topCenter',
-        timeout: 3000,
-        backgroundColor: '#ff5733',
-        color: 'white',
-      });
-      document.querySelector('[data-start]').disabled = true;
-    } else {
-      document.querySelector('[data-start]').disabled = false;
-    }
-  },
 });
