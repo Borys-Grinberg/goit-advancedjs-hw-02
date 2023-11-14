@@ -1,8 +1,6 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-// 03-promises.js
-
 const form = document.querySelector('.form');
 
 form.addEventListener('submit', function (event) {
@@ -30,6 +28,9 @@ form.addEventListener('submit', function (event) {
         });
       });
   }
+
+  // Очистка форми
+  form.reset();
 });
 
 function createPromise(position, delay) {
